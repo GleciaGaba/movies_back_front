@@ -4,30 +4,40 @@ import { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/home/Home';
-
+import Header from './components/header/Header';
+import Trailer from './components/trailer/Trailer';
+import Reviews from './components/reviews/Reviews';
 
 function App() {
-  const [movies, setMovies] = useState();
+  // Initialisation avec un tableau vide pour éviter les erreurs
+  const [movies, setMovies] = useState([]);
+  const [movie, setMovie] = useState({});
+  const [reviews, setReviews] = useState([]);
 
   const getMovies = async () => {
-
-    try
-    {
+    try {
       const response = await api.get('/api/v1/movies');
-
       console.log(response.data);
-    
       setMovies(response.data);
-
-    }
-    
-    catch(error)
-    {
+    } catch (error) {
       console.log(error);
     }
+  }
 
-    
-  };
+  const getMovieData = async (movieId) => {
+    try {
+        const response = await api.get(`/api/v1/movies/${movieId}`);
+
+        const singleMovie = response.data;
+
+        setMovie(singleMovie);  // Utilisation de setMovie au lieu de setMovies
+
+        setReviews(singleMovie.reviews);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
 
   useEffect(() => {
     getMovies();
@@ -35,12 +45,24 @@ function App() {
 
   return (
     <div className="App">
+      <Header />
       <Routes>
-        <Route path="/" element={<Layout/>}>
-        <Route path="/" element={<Home movies={movies} />}></Route>
+        {/* Route principale qui englobe le layout et les autres routes */}
+        <Route path="/" element={<Layout />}>
+          {/* Route home pour afficher les films */}
+          <Route index element={<Home movies={movies} />} />
+          {/* Route trailer */}
+          <Route path="/Trailer/:ytTrailerId" element={<Trailer />} />
+          <Route 
+          path="/Reviews/:movieId" 
+          element = {<Reviews 
+                        getMovieData={getMovieData} 
+                        movie={movie}
+                        reviews={reviews}
+                        setReviews={setReviews}
+                        />}></Route>
         </Route>
-        
-      </Routes>      
+      </Routes>
     </div>
   );
 }
