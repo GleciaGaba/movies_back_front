@@ -5,40 +5,42 @@ import { Container, Row, Col } from "react-bootstrap";
 import ReviewForm from "../reviewForm/ReviewForm";
 
 const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
-    const revText = useRef();
-    let params = useParams();
+    const revText = useRef(); // Référence pour le champ texte de la review
+    let params = useParams(); // Récupère l'ID du film à partir des paramètres de la route
     const movieId = params.movieId;
 
-    // Vérifie que les reviews sont initialisées comme un tableau vide si non défini
+    // Charge les données du film lorsqu'on accède à la page
     useEffect(() => {
-        getMovieData(movieId);
-    }, [movieId, getMovieData]);
+        getMovieData(movieId); // Appelle la fonction pour récupérer les données du film
+    }, [movieId, getMovieData]); // Dépend uniquement de `movieId` et `getMovieData`, pas de `reviews`
 
+    // Fonction pour ajouter une review
     const addReview = async (e) => {
         e.preventDefault(); // Empêche le rechargement de la page
-    
-        const reviewText = revText.current.value; // Obtenir la valeur du champ texte
-    
-        console.log("Review text:", reviewText); // Ajouter un log pour vérifier la valeur
-    
-        if (reviewText.trim() === "") { // Vérifie si le texte est vide ou ne contient que des espaces
-            console.log("Review text is empty.");
-            return; // Ne pas soumettre une review vide
-        }
-    
+
         try {
-            const response = await api.post("/api/v1/reviews", { reviewBody: reviewText, movieId: movieId });
-    
+            const reviewBody = revText.current.value; // Capture la valeur du champ texte
+
+            if (reviewBody.trim() === "") {
+                console.log("Review text is empty.");
+                return;
+            }
+
+            // Requête pour ajouter la review
+            await api.post("/api/v1/reviews", { reviewBody, movieId });
+
             // Mettre à jour les reviews avec la nouvelle review ajoutée
-            const updatedReviews = Array.isArray(reviews) ? [...reviews, { body: reviewText }] : [{ body: reviewText }];
-    
-            setReviews(updatedReviews); // Mettre à jour l'état avec les nouvelles reviews
-            revText.current.value = ""; // Réinitialiser le champ texte après l'envoi
-        } catch (error) {
-            console.error("Erreur lors de l'ajout de la review", error);
+            const updatedReviews = [...reviews, { body: reviewBody }];
+
+            setReviews(updatedReviews); // Met à jour l'état avec la nouvelle liste des reviews
+            revText.current.value = ""; // Réinitialise le champ texte après l'envoi
+
+            console.log("Reviews after update:", updatedReviews); // Log pour vérifier la mise à jour des reviews
+        } 
+        catch (error) {
+            console.error("Erreur lors de l'ajout de la review:", error);
         }
     };
-    
 
     return (
         <Container>
@@ -70,7 +72,9 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
                         reviews.map((r, index) => (
                             <React.Fragment key={index}>
                                 <Row>
-                                    <Col>{r.body}</Col>
+                                    <Col>
+                                        <p>{r.body}</p> {/* Affiche chaque review */}
+                                    </Col>
                                 </Row>
                                 <Row>
                                     <Col>
@@ -80,13 +84,8 @@ const Reviews = ({ getMovieData, movie, reviews, setReviews }) => {
                             </React.Fragment>
                         ))
                     ) : (
-                        <p>No reviews yet.</p>
+                        <p>No reviews yet.</p> // Message par défaut si aucune review n'existe
                     )}
-                </Col>
-            </Row>
-            <Row>
-                <Col>
-                    <hr />
                 </Col>
             </Row>
         </Container>

@@ -7,13 +7,13 @@ const ReviewForm = ({ handleSubmit, revText, labelText, defaultValue }) => {
             <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
                 <Form.Label>{labelText}</Form.Label>
                 <Form.Control
+                    ref={revText}
                     as="textarea"
                     rows={3}
-                    ref={revText} // Assignation de la référence ici
                     defaultValue={defaultValue}
                 />
             </Form.Group>
-            <Button variant="outline-info" type="submit">Submit</Button>
+            <Button variant="outline-info" onClick={handleSubmit}>Submit</Button>
         </Form>
     );
 };

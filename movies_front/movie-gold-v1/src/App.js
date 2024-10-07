@@ -9,58 +9,53 @@ import Trailer from './components/trailer/Trailer';
 import Reviews from './components/reviews/Reviews';
 
 function App() {
-  // Initialisation avec un tableau vide pour éviter les erreurs
-  const [movies, setMovies] = useState([]);
-  const [movie, setMovie] = useState({});
-  const [reviews, setReviews] = useState([]);
+  const [movies, setMovies] = useState([]);  // Initialise les films avec un tableau vide
+  const [movie, setMovie] = useState(null);  // Initialise `movie` comme null
+  const [reviews, setReviews] = useState([]);  // Initialise les reviews avec un tableau vide
 
   const getMovies = async () => {
     try {
       const response = await api.get('/api/v1/movies');
-      console.log(response.data);
-      setMovies(response.data);
+      setMovies(response.data);  // Mets à jour l'état des films
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
-  }
+  };
 
   const getMovieData = async (movieId) => {
     try {
-        const response = await api.get(`/api/v1/movies/${movieId}`);
+      const response = await api.get(`/api/v1/movies/${movieId}`);
+      const singleMovie = response.data;
 
-        const singleMovie = response.data;
-
-        setMovie(singleMovie);  // Utilisation de setMovie au lieu de setMovies
-
-        setReviews(singleMovie.reviews);
-
+      setMovie(singleMovie); 
+       
+      setReviews(singleMovie.reviews || []); 
+     
     } catch (error) {
-        console.log(error);
+      console.error(error);
     }
-}
+  };
 
   useEffect(() => {
-    getMovies();
+    getMovies();  // Récupère la liste des films à chaque chargement
   }, []);
 
   return (
     <div className="App">
       <Header />
       <Routes>
-        {/* Route principale qui englobe le layout et les autres routes */}
         <Route path="/" element={<Layout />}>
-          {/* Route home pour afficher les films */}
           <Route index element={<Home movies={movies} />} />
-          {/* Route trailer */}
           <Route path="/Trailer/:ytTrailerId" element={<Trailer />} />
           <Route 
-          path="/Reviews/:movieId" 
-          element = {<Reviews 
+            path="/Reviews/:movieId" 
+            element={<Reviews 
                         getMovieData={getMovieData} 
                         movie={movie}
-                        reviews={reviews}
-                        setReviews={setReviews}
-                        />}></Route>
+                        reviews={reviews}  // Passe l'état `reviews` ici
+                        setReviews={setReviews}  // Passe la fonction pour mettre à jour les reviews
+                      />}
+          />
         </Route>
       </Routes>
     </div>
